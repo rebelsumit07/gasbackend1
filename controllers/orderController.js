@@ -51,6 +51,7 @@ export const createOrder = async (req, res) => {
         message: "Payment screenshot is required for online payment",
       });
     }
+
     // ✅ Generate a unique short orderId
     let orderId;
     let exists = true;
@@ -60,7 +61,9 @@ export const createOrder = async (req, res) => {
       if (!existingOrder) exists = false;
     }
 
+    // ✅ Include orderId in saved document
     const newOrder = new Order({
+      orderId,
       customerName,
       customerEmail,
       customerPhone,
@@ -76,7 +79,12 @@ export const createOrder = async (req, res) => {
     });
 
     await newOrder.save();
-    res.status(201).json({ success: true, message: "Order created successfully" });
+
+    res.status(201).json({
+      success: true,
+      message: "Order created successfully",
+      orderId: newOrder.orderId,
+    });
   } catch (error) {
     console.error("Error creating order:", error);
     res.status(500).json({ success: false, message: "Server error", error: error.message });
@@ -101,7 +109,12 @@ export const updateOrderStatus = async (req, res) => {
     const { orderId } = req.params;
     const { status } = req.body;
 
-    const updatedOrder = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderId },
+      { status },
+      { new: true }
+    );
+
     if (!updatedOrder) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
