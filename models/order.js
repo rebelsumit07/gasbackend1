@@ -17,7 +17,7 @@ const orderSchema = new mongoose.Schema(
       enum: ["online", "cod"],
       required: true,
     },
-    paymentScreenshot: { type: String }, // base64 or URL string
+    transactionCode: { type: String, default: null }, // ✅ Store transaction code for online payments
     cylinderName: { type: String, required: true },
     cylinderPrice: { type: Number, required: true },
     deliveryCharge: { type: Number, required: true },
