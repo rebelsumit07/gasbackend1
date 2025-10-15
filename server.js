@@ -1,16 +1,18 @@
 import express from "express";
+import cors from "cors";                // ✅ Import cors here
 import dotenv from "dotenv";
-import connectDB from "./config/db.js"; // <- your db.js
+import connectDB from "./config/db.js"; 
 
 dotenv.config();
 
 const app = express();
 
-// Middleware etc
-app.use(express.json());
+// Enable CORS **before routes**
+app.use(cors());                        // ✅ Allow all origins temporarily
+app.use(express.json());                // Parse JSON
 
 // Connect to MongoDB
-connectDB();  // <-- This actually runs the DB connection
+connectDB();  
 
 // Your routes
 import authRoutes from "./routes/authRoutes.js";
