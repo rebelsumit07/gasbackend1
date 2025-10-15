@@ -1,0 +1,99 @@
+// controllers/orderController.js
+import Order from "../models/order.js";
+
+// ✅ Create a new order
+export const createOrder = async (req, res) => {
+  try {
+    const {
+      customerName,
+      customerEmail,
+      customerPhone,
+      address,
+      deliveryType,
+      paymentMethod,
+      paymentScreenshot,
+      cylinderName,
+      cylinderPrice,
+      deliveryCharge,
+      totalPrice,
+    } = req.body;
+
+    // Validate required fields
+    if (
+      !customerName ||
+      !customerEmail ||
+      !customerPhone ||
+      !address ||
+      !deliveryType ||
+      !paymentMethod ||
+      !cylinderName ||
+      !cylinderPrice ||
+      !deliveryCharge ||
+      !totalPrice
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All required fields must be provided",
+      });
+    }
+
+    // For online payment, require screenshot
+    if (paymentMethod === "online" && !paymentScreenshot) {
+      return res.status(400).json({
+        success: false,
+        message: "Payment screenshot is required for online payment",
+      });
+    }
+
+    const newOrder = new Order({
+      customerName,
+      customerEmail,
+      customerPhone,
+      address,
+      deliveryType,
+      paymentMethod,
+      paymentScreenshot,
+      cylinderName,
+      cylinderPrice,
+      deliveryCharge,
+      totalPrice,
+      status: "Pending",
+    });
+
+    await newOrder.save();
+    res.status(201).json({ success: true, message: "Order created successfully" });
+  } catch (error) {
+    console.error("Error creating order:", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// ✅ Get all orders of a specific customer
+export const getCustomerOrders = async (req, res) => {
+  try {
+    const { customerEmail } = req.params;
+    const orders = await Order.find({ customerEmail }).sort({ createdAt: -1 });
+    res.status(200).json({ success: true, orders });
+  } catch (error) {
+    console.error("Error fetching customer orders:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// ✅ Update order status
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Order status updated", order: updatedOrder });
+  } catch (error) {
+    console.error("Error updating order:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
