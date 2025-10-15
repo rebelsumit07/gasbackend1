@@ -8,8 +8,16 @@ dotenv.config();
 const app = express();
 
 // Enable CORS **before routes**
-app.use(cors());                        // ✅ Allow all origins temporarily
-app.use(express.json());                // Parse JSON
+import cors from "cors";
+
+const corsOptions = {
+  origin: ["http://127.0.0.1:5500", "http://localhost:5500"], // allow local testing
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+
 
 // Connect to MongoDB
 connectDB();  
@@ -30,3 +38,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
