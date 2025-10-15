@@ -1,3 +1,4 @@
+// controllers/orderController.js
 import Order from "../models/order.js";
 
 // Function to generate 4 digits + 1 uppercase letter
@@ -50,7 +51,6 @@ export const createOrder = async (req, res) => {
         message: "Payment screenshot is required for online payment",
       });
     }
-
     // ✅ Generate a unique short orderId
     let orderId;
     let exists = true;
@@ -61,7 +61,6 @@ export const createOrder = async (req, res) => {
     }
 
     const newOrder = new Order({
-      orderId,
       customerName,
       customerEmail,
       customerPhone,
@@ -77,14 +76,39 @@ export const createOrder = async (req, res) => {
     });
 
     await newOrder.save();
-
-    res.status(201).json({
-      success: true,
-      message: "Order created successfully",
-      orderId: newOrder.orderId,
-    });
+    res.status(201).json({ success: true, message: "Order created successfully" });
   } catch (error) {
     console.error("Error creating order:", error);
     res.status(500).json({ success: false, message: "Server error", error: error.message });
+  }
+};
+
+// ✅ Get all orders of a specific customer
+export const getCustomerOrders = async (req, res) => {
+  try {
+    const { customerEmail } = req.params;
+    const orders = await Order.find({ customerEmail }).sort({ createdAt: -1 });
+    res.status(200).json({ success: true, orders });
+  } catch (error) {
+    console.error("Error fetching customer orders:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+// ✅ Update order status
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+    if (!updatedOrder) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Order status updated", order: updatedOrder });
+  } catch (error) {
+    console.error("Error updating order:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
