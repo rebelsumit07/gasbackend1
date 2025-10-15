@@ -1,10 +1,5 @@
 import express from "express";
-import {
-  createOrder,
-  getCustomerOrders,
-  updateOrderStatus,
-} from "../controllers/orderController.js";
-
+import { createOrder, getCustomerOrders, updateOrderStatus } from "../controllers/orderController.js";
 import { upload } from "../config/cloudinary.js"; // Cloudinary middleware
 import Order from "../models/order.js";
 
@@ -19,9 +14,7 @@ router.get("/customer/:customerEmail", getCustomerOrders);
 // Update order status (Admin or Courier)
 router.put("/status/:orderId", updateOrderStatus);
 
-// -------------------------------
-// New route: Upload payment screenshot
-// -------------------------------
+// Upload payment screenshot
 router.put("/:orderId/payment", upload.single("paymentScreenshot"), async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -30,9 +23,8 @@ router.put("/:orderId/payment", upload.single("paymentScreenshot"), async (req, 
       return res.status(400).json({ success: false, message: "No file uploaded" });
     }
 
-    // Update order with Cloudinary URL and set verification status
-    const updatedOrder = await Order.findByIdAndUpdate(
-      orderId,
+    const updatedOrder = await Order.findOneAndUpdate(
+      { orderId }, // ✅ Use orderId
       {
         paymentScreenshotUrl: req.file.path,
         verificationStatus: "Pending",
