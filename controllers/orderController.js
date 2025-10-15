@@ -1,5 +1,11 @@
 import Order from "../models/order.js";
-import { v4 as uuidv4 } from "uuid";
+
+// Function to generate 4 digits + 1 uppercase letter
+function generateShortOrderId() {
+  const digits = Math.floor(1000 + Math.random() * 9000); // 1000-9999
+  const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // A-Z
+  return `${digits}${letter}`;
+}
 
 // ✅ Create a new order
 export const createOrder = async (req, res) => {
@@ -45,8 +51,14 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // ✅ Generate unique orderId
-    const orderId = uuidv4();
+    // ✅ Generate a unique short orderId
+    let orderId;
+    let exists = true;
+    while (exists) {
+      orderId = generateShortOrderId();
+      const existingOrder = await Order.findOne({ orderId });
+      if (!existingOrder) exists = false;
+    }
 
     const newOrder = new Order({
       orderId,
@@ -74,40 +86,5 @@ export const createOrder = async (req, res) => {
   } catch (error) {
     console.error("Error creating order:", error);
     res.status(500).json({ success: false, message: "Server error", error: error.message });
-  }
-};
-
-// ✅ Get all orders of a specific customer
-export const getCustomerOrders = async (req, res) => {
-  try {
-    const { customerEmail } = req.params;
-    const orders = await Order.find({ customerEmail }).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, orders });
-  } catch (error) {
-    console.error("Error fetching customer orders:", error);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-// ✅ Update order status
-export const updateOrderStatus = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const { status } = req.body;
-
-    const updatedOrder = await Order.findOneAndUpdate(
-      { orderId }, // ✅ Use orderId instead of _id
-      { status },
-      { new: true }
-    );
-
-    if (!updatedOrder) {
-      return res.status(404).json({ success: false, message: "Order not found" });
-    }
-
-    res.status(200).json({ success: true, message: "Order status updated", order: updatedOrder });
-  } catch (error) {
-    console.error("Error updating order:", error);
-    res.status(500).json({ success: false, message: "Server error" });
   }
 };
