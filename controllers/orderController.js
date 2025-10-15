@@ -1,5 +1,6 @@
 // controllers/orderController.js
 import Order from "../models/order.js";
+import { v4 as uuidv4 } from "uuid"; // ✅ Import UUID for unique order IDs
 
 // ✅ Create a new order
 export const createOrder = async (req, res) => {
@@ -45,7 +46,11 @@ export const createOrder = async (req, res) => {
       });
     }
 
+    // ✅ Generate a unique orderId
+    const orderId = uuidv4();
+
     const newOrder = new Order({
+      orderId, // assign the generated UUID
       customerName,
       customerEmail,
       customerPhone,
@@ -61,7 +66,13 @@ export const createOrder = async (req, res) => {
     });
 
     await newOrder.save();
-    res.status(201).json({ success: true, message: "Order created successfully" });
+
+    // ✅ Return orderId to frontend
+    res.status(201).json({
+      success: true,
+      message: "Order created successfully",
+      orderId: newOrder.orderId,
+    });
   } catch (error) {
     console.error("Error creating order:", error);
     res.status(500).json({ success: false, message: "Server error", error: error.message });
