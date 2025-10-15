@@ -18,7 +18,7 @@ export const createOrder = async (req, res) => {
       address,
       deliveryType,
       paymentMethod,
-      paymentScreenshot,
+      transactionCode, // ✅ replaced paymentScreenshot
       cylinderName,
       cylinderPrice,
       deliveryCharge,
@@ -44,11 +44,11 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // For online payment, require screenshot
-    if (paymentMethod === "online" && !paymentScreenshot) {
+    // For online payment, require transaction code
+    if (paymentMethod === "online" && !transactionCode) {
       return res.status(400).json({
         success: false,
-        message: "Payment screenshot is required for online payment",
+        message: "Transaction code is required for online payment",
       });
     }
 
@@ -70,7 +70,7 @@ export const createOrder = async (req, res) => {
       address,
       deliveryType,
       paymentMethod,
-      paymentScreenshot,
+      transactionCode, // ✅ store transaction code instead of screenshot
       cylinderName,
       cylinderPrice,
       deliveryCharge,
