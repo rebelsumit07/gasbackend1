@@ -125,3 +125,30 @@ export const updateOrderStatus = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+// ✅ Track order by orderId
+export const trackOrderById = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Order fetched successfully",
+      order: {
+        status: order.status,
+        totalPrice: order.totalPrice,
+        address: order.address,
+      },
+    });
+  } catch (error) {
+    console.error("Error tracking order:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
