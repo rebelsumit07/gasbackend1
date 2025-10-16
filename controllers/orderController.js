@@ -140,6 +140,8 @@ export const trackOrderById = async (req, res) => {
       success: true,
       message: "Order fetched successfully",
       order: {
+         customerName: order.customerName,
+        cylinderName: order.cylinderName,
         status: order.status,
         totalPrice: order.totalPrice,
         address: order.address,
@@ -150,5 +152,6 @@ export const trackOrderById = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
 
 
