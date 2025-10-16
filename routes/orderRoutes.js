@@ -14,8 +14,13 @@ router.get("/customer/:customerEmail", getCustomerOrders);
 // Update order status (Admin or Courier)
 router.put("/status/:orderId", updateOrderStatus);
 
+// order tacing 
+router.get("/track/:orderId", trackOrderById);
+
+
 // ✅ Remove /:orderId/payment route since transactionCode is sent on creation
 // If needed in future, you can create a route to update transactionCode:
 // router.put("/:orderId/transaction", async (req, res) => { ... });
 
 export default router;
+
